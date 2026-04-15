@@ -1,0 +1,21 @@
+{
+  "name": "campus-housing-intelligence-system",
+  "private": true,
+  "version": "0.1.0",
+  "description": "University-integrated student accommodation and residential intelligence platform",
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:web": "npm --workspace apps/web run dev",
+    "dev:functions": "npm --workspace services/firebase-functions run serve",
+    "lint": "echo \"Add lint scripts after app initialization\"",
+    "test": "echo \"Add test scripts after app initialization\""
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}
