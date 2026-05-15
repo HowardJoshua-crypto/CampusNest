@@ -31,5 +31,4 @@
 - `GET /analytics/rent-trends`
 - `GET /analytics/complaint-categories`
 
-## Suggested approach
-If you stay on Firebase, use callable functions or HTTP cloud functions only for protected operations. Simple reads can be served directly from Firestore using security rules.
+

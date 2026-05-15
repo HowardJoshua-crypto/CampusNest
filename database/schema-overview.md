@@ -2,60 +2,76 @@
 
 ## Main collections / entities
 ### users
-- id
-- role
+- UserID (Primary Key)
+- Name
 - fullName
-- email
+- Email
 - phone
 - universityId
 - verified
-- createdAt
+- DateJoined
+- UserType (Student, Landlord, Admin, Welfare Officer, Security Officer)
+- PasswordHash
+- ProfileStatus (Active, Suspended, Pending Verification)
+
 
 ### studentProfiles
-- userId
-- yearOfStudy
-- faculty
-- gender (optional, privacy-aware)
-- preferredBudgetRange
-- preferredAreas
+- StudentID (Primary Key, FK to UserID)
+- Course/Department
+- YearOfStudy
+- Preferences (JSON or separate table for housing preferences)
+- EmergencyContact
+- gender(optional for privacy)
 
 ### landlordProfiles
-- userId
-- nationalIdNumber
-- verificationStatus
-- companyName
+- LandlordID (Primary Key, FK to UserID)
+- VerifiedStatus (Boolean or enum: Pending, Verified, Rejected)
+- IdentityDocuments (Links to uploaded IDs)
+- OwnershipProofDocuments
+- BackgroundCheckStatus
+- VerificationDate
 
 ### properties
-- id
-- landlordId
-- title
-- description
-- locationName
-- latitude
-- longitude
-- rentAmount
-- amenities
-- imageUrls
-- verificationStatus
-- createdAt
+- ListingID (Primary Key)
+- LandlordID (Foreign Key)
+- Title
+- Description
+- Address
+- Latitude
+- Longitude
+- PropertyType (Apartment, Shared Room, Entire House, Studio)
+- NumberOfRooms
+- Price
+- AvailabilityStatus (Available, Booked, Not Available)
+- VerifiedStatus (Pending, Verified, Rejected)
+- Photos (Links to photo records)
+- ListingDate
+- LastUpdated
+
+## ListingVerificationDocuments
+- DocumentID (Primary Key)
+- ListingID (Foreign Key)
+- DocumentType (OwnershipProof, RentalPermit, Photos, etc.)
+- DocumentURL
+- UploadDate
 
 ### reviews
-- id
-- propertyId
-- studentId
-- rating
-- comment
-- createdAt
+- ReviewID (Primary Key)
+- ListingID (Foreign Key)
+- StudentID (Foreign Key)
+- LandlordID (Foreign Key)
+- Rating (Numeric)
+- Comments
+- ReviewDate
+- ReviewStatus (Visible, Hidden, Flagged)
 
 ### reports
-- id
-- submittedBy
-- propertyId
-- category
-- severity
-- description
-- status
-- createdAt
+- ReportID (Primary Key)
+- ReporterID (Foreign Key)
+- PropertyID (Foreign Key)
+- Description
+- ReportDate
+- Status (Open, In Progress, Resolved)
 
 ### areaAnalytics
 - areaName
@@ -65,3 +81,39 @@
 - safetyScore
 - studentDensityEstimate
 - updatedAt
+
+## Booking
+- BookingID (Primary Key)
+- ListingID (Foreign Key)
+- StudentID (Foreign Key)
+- BookingDate
+- Status (Pending, Confirmed, Cancelled)
+- PaymentDetails (optional, if integrated)
+
+## Message
+- MessageID (Primary Key)
+- SenderID (Foreign Key)
+- ReceiverID (Foreign Key)
+- ListingID (Foreign Key, optional)
+- MessageContent
+- Timestamp
+- ReadStatus
+
+## AdminDashboardData
+- AreaID
+- NumberOfStudentsLiving
+- NumberOfListings
+- SafetyIncidents
+- WelfareInterventions
+
+## Amenities
+- AmenityID (Primary Key)
+- Name
+- Description
+
+## ListingAmenities
+- ListingID (Foreign Key)
+- AmenityID (Foreign Key)
+
+
+
