@@ -14,7 +14,9 @@ export interface AuthUser {
 interface AuthContextType {
   user: AuthUser | null
   login: (email: string, password: string, role: UserRole) => Promise<void>
+  loginWithData: (authUser: AuthUser) => void
   logout: () => void
+  updateUser: (partial: Partial<Pick<AuthUser, 'name'>>) => void
   isLoading: boolean
 }
 
@@ -36,11 +38,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false)
   }, [])
 
+  const persist = (u: AuthUser) => {
+    setUser(u)
+    localStorage.setItem('campus_housing_user', JSON.stringify(u))
+  }
+
   const login = async (email: string, password: string, role: UserRole) => {
     const { token, user: u } = await api.auth.login(email, password, role)
-    const authUser: AuthUser = { id: u.id, name: u.name, email: u.email, role: u.role as UserRole, token }
-    setUser(authUser)
-    localStorage.setItem('campus_housing_user', JSON.stringify(authUser))
+    persist({ id: u.id, name: u.name, email: u.email, role: u.role as UserRole, token })
+  }
+
+  const loginWithData = (authUser: AuthUser) => {
+    persist(authUser)
+  }
+
+  const updateUser = (partial: Partial<Pick<AuthUser, 'name'>>) => {
+    if (!user) return
+    const updated = { ...user, ...partial }
+    persist(updated)
   }
 
   const logout = () => {
@@ -49,7 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, loginWithData, logout, updateUser, isLoading }}>
       {children}
     </AuthContext.Provider>
   )

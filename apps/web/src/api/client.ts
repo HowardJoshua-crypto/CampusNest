@@ -24,17 +24,42 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return data
 }
 
+async function upload<T>(path: string, formData: FormData): Promise<T> {
+  const token = getToken()
+  const headers: Record<string, string> = {}
+  if (token) headers['Authorization'] = `Bearer ${token}`
+  const res = await fetch(`${BASE_URL}${path}`, { method: 'POST', headers, body: formData })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || `Upload failed: ${res.status}`)
+  return data
+}
+
 export const api = {
   auth: {
     login: (email: string, password: string, role: string) =>
-      request<{ token: string; user: { id: number; email: string; name: string; role: string } }>(
-        '/auth/login', { method: 'POST', body: JSON.stringify({ email, password, role }) }
-      ),
-    register: (data: { email: string; password: string; name: string; role: string; phone?: string }) =>
-      request<{ token: string; user: { id: number; email: string; name: string; role: string } }>(
-        '/auth/register', { method: 'POST', body: JSON.stringify(data) }
-      ),
-    me: () => request<{ id: number; email: string; name: string; role: string }>('/auth/me'),
+      request<{ token: string; user: User }>('/auth/login', {
+        method: 'POST', body: JSON.stringify({ email, password, role }),
+      }),
+    register: (data: Record<string, unknown>) =>
+      request<{ token: string; user: User }>('/auth/register', {
+        method: 'POST', body: JSON.stringify(data),
+      }),
+    me: () => request<User & {
+      course?: string; year_of_study?: number; budget_min?: number; budget_max?: number
+      preferred_area?: string; student_number?: string; company_name?: string
+      bio?: string; verified_landlord?: boolean; department?: string
+      can_verify_listings?: boolean; avatar_url?: string | null
+    }>('/auth/me'),
+  },
+
+  users: {
+    uploadAvatar: (file: File) => {
+      const fd = new FormData()
+      fd.append('avatar', file)
+      return upload<{ avatar_url: string }>('/users/avatar', fd)
+    },
+    updateProfile: (data: Record<string, unknown>) =>
+      request<User>('/users/profile', { method: 'PATCH', body: JSON.stringify(data) }),
   },
 
   listings: {
@@ -54,6 +79,7 @@ export const api = {
 
   reviews: {
     forListing: (listingId: number) => request<Review[]>(`/reviews/listing/${listingId}`),
+    my: () => request<(Review & { listing_title?: string })[]>('/reviews/my'),
     submit: (data: { listing_id: number; rating: number; comment?: string }) =>
       request<Review>('/reviews', { method: 'POST', body: JSON.stringify(data) }),
   },
@@ -76,8 +102,44 @@ export const api = {
     areaStats: () => request<AreaStat[]>('/admin/area-stats'),
     listings: () => request<Listing[]>('/admin/listings'),
     complaints: () => request<Complaint[]>('/admin/complaints'),
-    users: () => request<User[]>('/admin/users'),
+    students: () => request<StudentRecord[]>('/admin/students'),
+    landlords: () => request<LandlordRecord[]>('/admin/landlords'),
+    verifyLandlord: (userId: number, verified: boolean) =>
+      request<LandlordRecord>(`/admin/landlords/${userId}/verify`, {
+        method: 'PATCH', body: JSON.stringify({ verified }),
+      }),
   },
+}
+
+export interface User {
+  id: number
+  email: string
+  name: string
+  role: string
+  phone?: string
+  avatar_url?: string | null
+  created_at?: string
+}
+
+export interface StudentRecord extends User {
+  student_number?: string
+  year_of_study?: number
+  course?: string
+  budget_min?: number
+  budget_max?: number
+  preferred_area?: string
+  saved_count?: number
+  review_count?: number
+}
+
+export interface LandlordRecord extends User {
+  company_name?: string
+  bio?: string
+  verified_landlord?: boolean
+  avg_response_hours?: number
+  listing_count?: number
+  verified_listings?: number
+  avg_rating?: number
 }
 
 export interface Listing {
@@ -142,7 +204,7 @@ export interface AdminStats {
 
 export interface AreaStat {
   area: string
-  students: number
+  listing_count: number
   avg_rent: number
   incidents: number
 }
@@ -156,13 +218,5 @@ export interface Complaint {
   status: string
   student_name: string | null
   listing_title: string | null
-  created_at: string
-}
-
-export interface User {
-  id: number
-  email: string
-  name: string
-  role: string
   created_at: string
 }

@@ -157,6 +157,11 @@ export default function LoginPage() {
               Fill {selectedRole.label} demo credentials
             </button>
           </div>
+
+          <p className="text-center text-xs text-gray-500 mt-4">
+            New to CampusHome?{' '}
+            <a href="/register" className="text-blue-600 font-medium hover:underline">Create an account</a>
+          </p>
         </div>
       </div>
     </div>

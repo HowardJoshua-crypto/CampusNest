@@ -6,6 +6,18 @@ const { signToken, requireAuth } = require('../middleware/auth')
 
 const router = express.Router()
 
+const EMAIL_DOMAINS = {
+  student:  '@student.university.ac.uk',
+  admin:    '@university.ac.uk',
+  landlord: null,
+}
+
+function checkEmailDomain(email, role) {
+  const required = EMAIL_DOMAINS[role]
+  if (!required) return true
+  return email.toLowerCase().endsWith(required)
+}
+
 async function insertRoleProfile(userId, role, extra = {}) {
   if (role === 'student') {
     await db.query(
@@ -72,6 +84,11 @@ router.post('/register', [
 
   const { email, password, name, role, phone, ...extra } = req.body
   try {
+    if (!checkEmailDomain(email, role)) {
+      const domain = EMAIL_DOMAINS[role]
+      return res.status(400).json({ error: `${role.charAt(0).toUpperCase() + role.slice(1)} accounts require an email ending in ${domain}` })
+    }
+
     const existing = await db.query('SELECT id FROM users WHERE email = $1', [email])
     if (existing.rows.length > 0) return res.status(409).json({ error: 'Email already registered' })
 

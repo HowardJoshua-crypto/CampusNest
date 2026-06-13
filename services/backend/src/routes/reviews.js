@@ -21,6 +21,22 @@ router.get('/listing/:listingId', async (req, res) => {
   }
 })
 
+router.get('/my', requireAuth, requireRole('student'), async (req, res) => {
+  try {
+    const result = await db.query(`
+      SELECT r.id, r.listing_id, r.rating, r.comment, r.created_at,
+             l.title AS listing_title
+      FROM reviews r
+      JOIN listings l ON r.listing_id = l.id
+      WHERE r.student_id = $1
+      ORDER BY r.created_at DESC
+    `, [req.user.id])
+    res.json(result.rows)
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch reviews' })
+  }
+})
+
 router.post('/', requireAuth, requireRole('student'), [
   body('listing_id').isInt(),
   body('rating').isInt({ min: 1, max: 5 }),

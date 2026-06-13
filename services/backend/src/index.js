@@ -1,4 +1,5 @@
 require('dotenv').config()
+const path = require('path')
 const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
@@ -6,11 +7,14 @@ const helmet = require('helmet')
 const app = express()
 const PORT = process.env.PORT || 3001
 
-app.use(helmet())
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }))
 app.use(cors({ origin: '*', credentials: true }))
 app.use(express.json())
 
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')))
+
 app.use('/api/auth', require('./routes/auth'))
+app.use('/api/users', require('./routes/users'))
 app.use('/api/listings', require('./routes/listings'))
 app.use('/api/reviews', require('./routes/reviews'))
 app.use('/api/messages', require('./routes/messages'))
