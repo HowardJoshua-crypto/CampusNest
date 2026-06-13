@@ -4,6 +4,8 @@ import { SlidersHorizontal, X } from 'lucide-react'
 import { mockListings } from '../data/mockData'
 import ListingCard from '../components/ListingCard'
 
+const verifiedListings = mockListings.filter(l => l.verified)
+
 const areas = ['All Areas', 'Westbrook', 'Northgate', 'Southfield', 'Eastside', 'Central']
 const types = ['All Types', 'Studio', 'Room', 'Apartment', 'House Share']
 
@@ -13,7 +15,6 @@ export default function SearchPage() {
   const [selectedArea, setSelectedArea] = useState(searchParams.get('area') || 'All Areas')
   const [selectedType, setSelectedType] = useState('All Types')
   const [maxPrice, setMaxPrice] = useState(1000)
-  const [verifiedOnly, setVerifiedOnly] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
 
   useEffect(() => {
@@ -21,12 +22,11 @@ export default function SearchPage() {
     if (area) setSelectedArea(area)
   }, [searchParams])
 
-  const filtered = mockListings.filter(l => {
+  const filtered = verifiedListings.filter(l => {
     if (query && !l.title.toLowerCase().includes(query.toLowerCase()) && !l.area.toLowerCase().includes(query.toLowerCase())) return false
     if (selectedArea !== 'All Areas' && l.area !== selectedArea) return false
     if (selectedType !== 'All Types' && l.type !== selectedType) return false
     if (l.price > maxPrice) return false
-    if (verifiedOnly && !l.verified) return false
     return true
   })
 
@@ -85,16 +85,6 @@ export default function SearchPage() {
                 className="w-full"
               />
             </div>
-            <div className="flex items-center gap-2 mt-4">
-              <input
-                type="checkbox"
-                id="verified"
-                checked={verifiedOnly}
-                onChange={e => setVerifiedOnly(e.target.checked)}
-                className="h-4 w-4 accent-blue-600"
-              />
-              <label htmlFor="verified" className="text-sm text-gray-700">Verified only</label>
-            </div>
           </div>
         )}
       </div>
@@ -110,12 +100,6 @@ export default function SearchPage() {
           <span className="flex items-center gap-1 bg-blue-100 text-blue-700 text-xs font-medium px-3 py-1 rounded-full">
             {selectedType}
             <button onClick={() => setSelectedType('All Types')}><X className="h-3 w-3" /></button>
-          </span>
-        )}
-        {verifiedOnly && (
-          <span className="flex items-center gap-1 bg-green-100 text-green-700 text-xs font-medium px-3 py-1 rounded-full">
-            Verified Only
-            <button onClick={() => setVerifiedOnly(false)}><X className="h-3 w-3" /></button>
           </span>
         )}
         <p className="text-sm text-gray-500 ml-auto">{filtered.length} listing{filtered.length !== 1 ? 's' : ''} found</p>

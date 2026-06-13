@@ -5,6 +5,7 @@ import ListingCard from '../components/ListingCard'
 
 export default function HomePage() {
   const navigate = useNavigate()
+  const verifiedListings = mockListings.filter(l => l.verified)
 
   return (
     <div>
@@ -73,7 +74,7 @@ export default function HomePage() {
             </button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockListings.slice(0, 3).map(listing => (
+            {verifiedListings.slice(0, 3).map(listing => (
               <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
