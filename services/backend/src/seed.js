@@ -16,7 +16,7 @@ const users = [
   {
     email: 'student2@university.ac.uk', password: 'student123',
     name: 'Amara Bello', role: 'student',
-    profile: { student_number: 'S20240089', year_of_study: 1, course: 'Medicine', budget_min: 300, budget_max: 650, preferred_area: 'Central' },
+    profile: { student_number: 'REG/2026/MED/00089', year_of_study: 1, course: 'Medicine', budget_min: 300, budget_max: 650, preferred_area: 'Central' },
   },
   {
     email: 'landlord@housing.com', password: 'landlord123',
