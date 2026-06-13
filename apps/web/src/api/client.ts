@@ -98,15 +98,29 @@ export const api = {
   },
 
   admin: {
-    stats: () => request<AdminStats>('/admin/stats'),
+    stats: () => request<AdminStats & { flagged_listings?: number }>('/admin/stats'),
     areaStats: () => request<AreaStat[]>('/admin/area-stats'),
     listings: () => request<Listing[]>('/admin/listings'),
     complaints: () => request<Complaint[]>('/admin/complaints'),
     students: () => request<StudentRecord[]>('/admin/students'),
     landlords: () => request<LandlordRecord[]>('/admin/landlords'),
+    verifyListing: (id: number, verified: boolean) =>
+      request<Listing>(`/admin/listings/${id}/verify`, {
+        method: 'PATCH', body: JSON.stringify({ verified }),
+      }),
+    flagListing: (id: number, flagged: boolean, flag_reason?: string) =>
+      request<Listing>(`/admin/listings/${id}/flag`, {
+        method: 'PATCH', body: JSON.stringify({ flagged, flag_reason }),
+      }),
+    removeListing: (id: number) =>
+      request<{ message: string }>(`/admin/listings/${id}`, { method: 'DELETE' }),
     verifyLandlord: (userId: number, verified: boolean) =>
       request<LandlordRecord>(`/admin/landlords/${userId}/verify`, {
         method: 'PATCH', body: JSON.stringify({ verified }),
+      }),
+    messageLandlord: (landlordId: number, content: string, listingId?: number) =>
+      request<{ id: number }>('/admin/message-landlord', {
+        method: 'POST', body: JSON.stringify({ landlord_id: landlordId, content, listing_id: listingId }),
       }),
   },
 }
