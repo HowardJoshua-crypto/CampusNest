@@ -10,7 +10,8 @@
   ],
   "scripts": {
     "dev:web": "npm --workspace apps/web run dev",
-    "dev:functions": "npm --workspace services/firebase-functions run serve",
+    "dev:backend": "npm --workspace services/backend run dev",
+    "seed": "npm --workspace services/backend run seed",
     "lint": "echo \"Add lint scripts after app initialization\"",
     "test": "echo \"Add test scripts after app initialization\""
   },

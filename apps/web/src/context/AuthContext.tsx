@@ -1,12 +1,14 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { api } from '../api/client'
 
 export type UserRole = 'admin' | 'student' | 'landlord'
 
 export interface AuthUser {
+  id: number
   name: string
   email: string
   role: UserRole
-  avatar?: string
+  token: string
 }
 
 interface AuthContextType {
@@ -17,12 +19,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
-
-const MOCK_USERS: Record<string, { name: string; password: string; role: UserRole }> = {
-  'admin@university.ac.uk': { name: 'Dr. Margaret Cole', password: 'admin123', role: 'admin' },
-  'student@university.ac.uk': { name: 'Alex Johnson', password: 'student123', role: 'student' },
-  'landlord@housing.com': { name: 'James Okafor', password: 'landlord123', role: 'landlord' },
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
@@ -41,12 +37,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const login = async (email: string, password: string, role: UserRole) => {
-    await new Promise(r => setTimeout(r, 600))
-    const found = MOCK_USERS[email.toLowerCase()]
-    if (!found || found.password !== password || found.role !== role) {
-      throw new Error('Invalid credentials or role mismatch')
-    }
-    const authUser: AuthUser = { name: found.name, email, role: found.role }
+    const { token, user: u } = await api.auth.login(email, password, role)
+    const authUser: AuthUser = { id: u.id, name: u.name, email: u.email, role: u.role as UserRole, token }
     setUser(authUser)
     localStorage.setItem('campus_housing_user', JSON.stringify(authUser))
   }
